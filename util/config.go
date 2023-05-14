@@ -24,18 +24,19 @@ type Config struct {
 
 func LoadConfig(path string) (config Config, err error) {
 	if os.Getenv("G_ACTIONS") == "true" {
-		viper.SetConfigFile("../../github.env")
+		config.DBDriver = os.Getenv("DB_DRIVER")
+		config.DBSource = os.Getenv("DB_SOURCE")
+		config.ServerAddress = os.Getenv("SERVER_ADDRESS")
 	} else {
 		viper.SetConfigFile(path)
-	}
+		viper.AutomaticEnv()
+		err = viper.ReadInConfig()
+		if err != nil {
+			return
+		}
 
-	viper.AutomaticEnv()
-	err = viper.ReadInConfig()
-	if err != nil {
-		return
+		err = viper.Unmarshal(&config)
 	}
-
-	err = viper.Unmarshal(&config)
 
 	return
 }
