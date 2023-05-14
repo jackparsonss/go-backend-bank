@@ -6,19 +6,24 @@ import (
 	"fmt"
 )
 
+type Store interface {
+	Querier
+	TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error)
+}
+
 // The Store type contains a pointer to a Queries struct and a pointer to a sql.DB struct.
 // @property {Queries}  - The `Store` struct has two properties:
 // @property db - The `db` property is a pointer to a `sql.DB` object, which represents a database
 // connection pool. It is used to execute SQL queries and interact with the database.
-type Store struct {
+type SQLStore struct {
 	*Queries
 	db *sql.DB
 }
 
 // The function creates a new instance of a Store struct with a given database connection and
 // associated queries.
-func NewStore(db *sql.DB) *Store {
-	return &Store{
+func NewStore(db *sql.DB) Store {
+	return &SQLStore{
 		db:      db,
 		Queries: New(db),
 	}
@@ -28,7 +33,7 @@ func NewStore(db *sql.DB) *Store {
 // context and a function as input parameters. The function parameter is a function that takes a
 // `*Queries` object as input and returns an error. The `*Queries` object is used to execute database
 // queries within the transaction.
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
 	tx, err := store.db.BeginTx(ctx, nil)
 
 	if err != nil {
@@ -93,7 +98,7 @@ type TransferTxResult struct {
 }
 
 // TransferTx
-func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
+func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
 	var result TransferTxResult
 
 	err := store.execTx(ctx, func(q *Queries) error {

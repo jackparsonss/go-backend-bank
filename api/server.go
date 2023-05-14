@@ -17,7 +17,7 @@ import (
 // for defining routes, handling requests, and rendering responses. The `router` is responsible for
 // mapping incoming
 type Server struct {
-	store  *db.Store
+	store  db.Store
 	router *gin.Engine
 }
 
@@ -31,7 +31,7 @@ func (server *Server) Start(address string) error {
 
 // The function creates a new server instance with a given database store and sets up a router with
 // routes.
-func NewServer(store *db.Store) *Server {
+func NewServer(store db.Store) *Server {
 	server := &Server{
 		store: store,
 	}
@@ -39,12 +39,7 @@ func NewServer(store *db.Store) *Server {
 	apiRouter := router.Group("/api/v1")
 
 	// routes
-	accountRouter := apiRouter.Group("/accounts")
-	accountRouter.POST("", server.createAccount)
-	accountRouter.GET("/", server.listAccounts)
-	accountRouter.GET("/:id", server.getAccount)
-	accountRouter.PUT("/:id", server.updateAccount)
-	accountRouter.DELETE("/:id", server.deleteAccount)
+	server.addAccountRoutes(apiRouter)
 
 	server.router = router
 	return server
