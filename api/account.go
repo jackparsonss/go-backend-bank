@@ -152,6 +152,15 @@ type updateAccountRequest struct {
 	Balance int64 `json:"balance"`
 }
 
+// The `updateAccount` function is a method of the `Server` struct that handles HTTP requests to update
+// an account's balance. It first extracts the account ID from the URI path of the HTTP request using
+// the `ShouldBindUri` method. If there is an error during this process, it returns a 400 Bad Request
+// response. Otherwise, it uses the `ShouldBindJSON` method to extract the new balance from the request
+// body. If there is an error during this process, it returns a 400 Bad Request response. If the new
+// balance is less than 0, it returns a 400 Bad Request response with an error message. Otherwise, it
+// uses the `UpdateAccount` method from the database package to update the account with the given ID
+// and new balance. If there is an error during this process, it returns a 500 Internal Server Error
+// response. Otherwise, it returns a 200 OK response with the updated account.
 func (server *Server) updateAccount(ctx *gin.Context) {
 	var req updateAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
