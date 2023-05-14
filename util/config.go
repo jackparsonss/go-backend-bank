@@ -23,19 +23,14 @@ type Config struct {
 }
 
 func LoadConfig(path string) (config Config, err error) {
-	viper.AddConfigPath(path)
-
 	if os.Getenv("G_ACTIONS") == "true" {
-		viper.SetConfigName("")
+		viper.SetConfigFile("")
 	} else {
-		viper.SetConfigName("app")
+		viper.SetConfigFile(path)
 	}
 
-	viper.SetConfigType("env")
 	viper.AutomaticEnv()
-
 	err = viper.ReadInConfig()
-
 	if err != nil {
 		return
 	}
