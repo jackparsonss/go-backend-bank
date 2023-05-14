@@ -8,6 +8,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// The `addAccountRoutes` function is a method of the `Server` struct that adds routes for
+// account-related HTTP requests to the `apiRouter` instance of the `gin.RouterGroup` type. It creates
+// a new `accountRouter` instance of the `gin.RouterGroup` type with the base path of "/accounts" and
+// then adds HTTP request handlers for creating, listing, retrieving, updating, and deleting accounts
+// using the `createAccount`, `listAccounts`, `getAccount`, `updateAccount`, and `deleteAccount`
+// methods of the `Server` struct, respectively.
+func (server *Server) addAccountRoutes(apiRouter *gin.RouterGroup) {
+	accountRouter := apiRouter.Group("/accounts")
+	accountRouter.POST("", server.createAccount)
+	accountRouter.GET("", server.listAccounts)
+	accountRouter.GET("/:id", server.getAccount)
+	accountRouter.PUT("/:id", server.updateAccount)
+	accountRouter.DELETE("/:id", server.deleteAccount)
+}
+
 // The `createAccountRequest` type is a struct that represents a request to create an account with
 // required fields for owner and currency, where currency must be one of CAD, USD, or EUR.
 // @property {string} Owner - Owner is a property of the createAccountRequest struct. It is a string
@@ -149,7 +164,7 @@ func (server *Server) deleteAccount(ctx *gin.Context) {
 // identified by its `ID`.
 type updateAccountRequest struct {
 	ID      int64 `uri:"id" binding:"required,min=1"`
-	Balance int64 `json:"balance"`
+	Balance int64 `json:"balance" binding:"min=0"`
 }
 
 // The `updateAccount` function is a method of the `Server` struct that handles HTTP requests to update
@@ -170,11 +185,6 @@ func (server *Server) updateAccount(ctx *gin.Context) {
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
-
-	if req.Balance < 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid balance sent"})
 		return
 	}
 
