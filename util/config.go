@@ -24,7 +24,7 @@ type Config struct {
 
 func LoadConfig(path string) (config Config, err error) {
 	if os.Getenv("G_ACTIONS") == "true" {
-		viper.SetConfigFile("github.env")
+		viper.SetConfigFile("../../github.env")
 	} else {
 		viper.SetConfigFile(path)
 	}
