@@ -1,6 +1,10 @@
 package util
 
-import "github.com/spf13/viper"
+import (
+	"os"
+
+	"github.com/spf13/viper"
+)
 
 // The Config type contains fields for database driver, database source, and server address.
 // @property {string} DBDriver - DBDriver is a string property that represents the database driver to
@@ -20,9 +24,14 @@ type Config struct {
 
 func LoadConfig(path string) (config Config, err error) {
 	viper.AddConfigPath(path)
-	viper.SetConfigName("app")
-	viper.SetConfigType("env")
 
+	if os.Getenv("G_ACTIONS") == "true" {
+		viper.SetConfigName("")
+	} else {
+		viper.SetConfigName("app")
+	}
+
+	viper.SetConfigType("env")
 	viper.AutomaticEnv()
 
 	err = viper.ReadInConfig()

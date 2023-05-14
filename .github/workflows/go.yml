@@ -16,6 +16,7 @@ jobs:
       DB_DRIVER: ${{ secrets.DB_DRIVER }}
       DB_SOURCE: ${{ secrets.DB_SOURCE }}
       SERVER_ADDRESS: ${{ secrets.SERVER_ADDRESS }}
+      G_ACTIONS: ${{ secrets.G_ACTIONS }}
     services:
       postgres:
         image: postgres:12
