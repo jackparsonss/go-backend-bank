@@ -1,8 +1,8 @@
 package api
 
 import (
-	"database/sql"
 	db "go-backend/db/sqlc"
+	"go-backend/util"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,12 +29,12 @@ func (server *Server) addAccountRoutes(apiRouter *gin.RouterGroup) {
 // that represents the name of the owner of the account. The `json:"owner"` tag is used to specify the
 // name of the property when the struct is serialized to JSON. The `binding:"required"` tag is used to
 // @property {string} Currency - Currency is a property of the createAccountRequest struct. It is a
-// string type and is tagged with `json:"currency" binding:"required,oneof=CAD USD EUR"`. This means
+// string type and is tagged with `json:"currency" binding:"required,currency"`. This means
 // that when a request is made to create an account, the currency field must be included in the request
 // body
 type createAccountRequest struct {
 	Owner    string `json:"owner" binding:"required"`
-	Currency string `json:"currency" binding:"required,oneof=CAD USD EUR"`
+	Currency string `json:"currency" binding:"required,currency"`
 }
 
 // This is a function that creates a new account for a user. It receives a request with the owner's
@@ -45,7 +45,7 @@ type createAccountRequest struct {
 func (server *Server) createAccount(ctx *gin.Context) {
 	var req createAccountRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, util.ErrorResponse(err))
 		return
 	}
 
@@ -58,7 +58,7 @@ func (server *Server) createAccount(ctx *gin.Context) {
 	account, err := server.store.CreateAccount(ctx, arg)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, util.ErrorResponse(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, account)
@@ -80,20 +80,16 @@ type getAccountRequest struct {
 func (server *Server) getAccount(ctx *gin.Context) {
 	var req getAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, util.ErrorResponse(err))
 		return
 	}
 
 	account, err := server.store.GetAccount(ctx, req.ID)
 
-	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	if !util.CheckError(ctx, err) {
 		return
 	}
+
 	ctx.JSON(http.StatusOK, account)
 }
 
@@ -105,7 +101,7 @@ type listAccountsRequest struct {
 func (server *Server) listAccounts(ctx *gin.Context) {
 	var req listAccountsRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, util.ErrorResponse(err))
 		return
 	}
 
@@ -117,7 +113,7 @@ func (server *Server) listAccounts(ctx *gin.Context) {
 	accounts, err := server.store.ListAccounts(ctx, args)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, util.ErrorResponse(err))
 		return
 	}
 
@@ -143,14 +139,14 @@ type deleteAccountRequest struct {
 func (server *Server) deleteAccount(ctx *gin.Context) {
 	var req deleteAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, util.ErrorResponse(err))
 		return
 	}
 
 	err := server.store.DeleteAccount(ctx, req.ID)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, util.ErrorResponse(err))
 		return
 	}
 
@@ -179,12 +175,12 @@ type updateAccountRequest struct {
 func (server *Server) updateAccount(ctx *gin.Context) {
 	var req updateAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, util.ErrorResponse(err))
 		return
 	}
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, util.ErrorResponse(err))
 		return
 	}
 
@@ -196,7 +192,7 @@ func (server *Server) updateAccount(ctx *gin.Context) {
 	account, err := server.store.UpdateAccount(ctx, arg)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, util.ErrorResponse(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, account)

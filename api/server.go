@@ -4,6 +4,8 @@ import (
 	db "go-backend/db/sqlc"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 )
 
 // The Server type contains a database store and a router for handling HTTP requests in a Go
@@ -36,10 +38,16 @@ func NewServer(store db.Store) *Server {
 		store: store,
 	}
 	router := gin.Default()
-	apiRouter := router.Group("/api/v1")
+
+	// register custom validators
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("currency", validCurrency)
+	}
 
 	// routes
+	apiRouter := router.Group("/api/v1")
 	server.addAccountRoutes(apiRouter)
+	server.addTransferRoutes(apiRouter)
 
 	server.router = router
 	return server
