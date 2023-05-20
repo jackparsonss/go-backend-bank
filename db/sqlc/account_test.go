@@ -67,6 +67,31 @@ func TestGetAccountForUpdate(t *testing.T) {
 	require.WithinDuration(t, account1.CreatedAt, account2.CreatedAt, time.Second)
 }
 
+func TestUpdateAccount(t *testing.T) {
+	bal := util.RandomMoney()
+	// create account
+	account1 := createRandomAccount(t)
+	account2, err := testQueries.GetAccountForUpdate(context.Background(), account1.ID)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, account2)
+
+	args := UpdateAccountParams{
+		ID:      account2.ID,
+		Balance: bal,
+	}
+
+	account3, err := testQueries.UpdateAccount(context.Background(), args)
+	require.NoError(t, err)
+	require.NotEmpty(t, account3)
+
+	require.Equal(t, account1.ID, account3.ID)
+	require.Equal(t, account1.Owner, account3.Owner)
+	require.Equal(t, bal, account3.Balance)
+	require.Equal(t, account1.Currency, account3.Currency)
+	require.WithinDuration(t, account1.CreatedAt, account3.CreatedAt, time.Second)
+}
+
 func TestAddAccountBalance(t *testing.T) {
 	account1 := createRandomAccount(t)
 	arg := AddAccountBalanceParams{

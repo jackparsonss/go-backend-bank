@@ -48,6 +48,7 @@ func NewServer(store db.Store) *Server {
 	apiRouter := router.Group("/api/v1")
 	server.addAccountRoutes(apiRouter)
 	server.addTransferRoutes(apiRouter)
+	server.addUserRoutes(apiRouter)
 
 	server.router = router
 	return server
