@@ -2,6 +2,7 @@ package util
 
 import (
 	"os"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -17,16 +18,26 @@ import (
 // for incoming requests. This property is typically used in web applications to specify the IP address
 // and port number on which the server should listen for incoming HTTP
 type Config struct {
-	DBDriver      string `mapstructure:"DB_DRIVER"`
-	DBSource      string `mapstructure:"DB_SOURCE"`
-	ServerAddress string `mapstructure:"SERVER_ADDRESS"`
+	DBDriver            string        `mapstructure:"DB_DRIVER"`
+	DBSource            string        `mapstructure:"DB_SOURCE"`
+	ServerAddress       string        `mapstructure:"SERVER_ADDRESS"`
+	TokenSymmetricKey   string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
+	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 }
 
 func LoadConfig(path string) (config Config, err error) {
 	if os.Getenv("G_ACTIONS") == "true" {
+		// GITHUB ACTIONS ENV VARIABLES
+		dur, err := time.ParseDuration(os.Getenv("ACCESS_TOKEN_DURATION"))
+		if err != nil {
+			return Config{}, err
+		}
+
 		config.DBDriver = os.Getenv("DB_DRIVER")
 		config.DBSource = os.Getenv("DB_SOURCE")
 		config.ServerAddress = os.Getenv("SERVER_ADDRESS")
+		config.TokenSymmetricKey = os.Getenv("TOKEN_SYMMETRIC_KEY")
+		config.AccessTokenDuration = dur
 	} else {
 		viper.SetConfigFile(path)
 		viper.AutomaticEnv()

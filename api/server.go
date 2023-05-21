@@ -1,7 +1,10 @@
 package api
 
 import (
+	"fmt"
 	db "go-backend/db/sqlc"
+	"go-backend/token"
+	"go-backend/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -19,8 +22,10 @@ import (
 // for defining routes, handling requests, and rendering responses. The `router` is responsible for
 // mapping incoming
 type Server struct {
-	store  db.Store
-	router *gin.Engine
+	config     util.Config
+	store      db.Store
+	tokenMaker token.Maker
+	router     *gin.Engine
 }
 
 // The `Start` function is a method of the `Server` struct that starts the server by running the router
@@ -33,9 +38,16 @@ func (server *Server) Start(address string) error {
 
 // The function creates a new server instance with a given database store and sets up a router with
 // routes.
-func NewServer(store db.Store) *Server {
+func NewServer(config util.Config, store db.Store) (*Server, error) {
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create token maker: %w", err)
+	}
+
 	server := &Server{
-		store: store,
+		config:     config,
+		store:      store,
+		tokenMaker: tokenMaker,
 	}
 	router := gin.Default()
 
@@ -51,5 +63,5 @@ func NewServer(store db.Store) *Server {
 	server.addUserRoutes(apiRouter)
 
 	server.router = router
-	return server
+	return server, nil
 }

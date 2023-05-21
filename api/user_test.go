@@ -171,7 +171,7 @@ func TestCreateUserAPI(t *testing.T) {
 			tc.buildStub(store)
 
 			// start test server and send request
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			data, err := json.Marshal(tc.body)
@@ -236,7 +236,7 @@ func TestGetUser(t *testing.T) {
 			tc.buildStub(store)
 
 			// start test server and send request
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			url := fmt.Sprintf("/api/v1/users/%s", tc.username)
