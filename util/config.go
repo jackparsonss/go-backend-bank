@@ -28,7 +28,7 @@ type Config struct {
 func LoadConfig(path string) (config Config, err error) {
 	if os.Getenv("G_ACTIONS") == "true" {
 		// GITHUB ACTIONS ENV VARIABLES
-		dur, err := time.ParseDuration(os.Getenv("ACCESS_TOKEN_DURATION"))
+		dur, err := time.ParseDuration("100000m")
 		if err != nil {
 			return Config{}, err
 		}
