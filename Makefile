@@ -31,4 +31,10 @@ server:
 mock:
 	mockgen -destination db/mock/store.go -package mockdb go-backend/db/sqlc Store
 
-.PHONY: createdb dropdb postgres migrateup migrateup-all migratedown migratedown-all sqlc test server mock
+docker:
+	docker build -t simplebank:latest .
+
+docker-run:
+	docker run --name simplebank -p 8080:8080 -e GIN_MODE=release simplebank:latest
+
+.PHONY: createdb dropdb postgres migrateup migrateup-all migratedown migratedown-all sqlc test server mock docker docker-run
