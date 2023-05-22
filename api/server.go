@@ -58,9 +58,11 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 
 	// routes
 	apiRouter := router.Group("/api/v1")
+	server.addUserRoutes(apiRouter)
+
+	apiRouter.Use(authMiddleware(server.tokenMaker))
 	server.addAccountRoutes(apiRouter)
 	server.addTransferRoutes(apiRouter)
-	server.addUserRoutes(apiRouter)
 
 	server.router = router
 	return server, nil

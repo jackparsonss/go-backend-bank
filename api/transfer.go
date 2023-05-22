@@ -1,8 +1,10 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	db "go-backend/db/sqlc"
+	"go-backend/token"
 	"go-backend/util"
 	"net/http"
 
@@ -51,11 +53,20 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 		return
 	}
 
-	if !server.validAccount(ctx, req.FromAccountID, req.Currency) {
+	fromAccount, valid := server.validAccount(ctx, req.FromAccountID, req.Currency)
+	if !valid {
 		return
 	}
 
-	if !server.validAccount(ctx, req.ToAccountID, req.Currency) {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if fromAccount.Owner != authPayload.Username {
+		err := errors.New("from account doesn't belong to authenticated user")
+		ctx.JSON(http.StatusUnauthorized, util.ErrorResponse(err))
+		return
+	}
+
+	_, valid = server.validAccount(ctx, req.ToAccountID, req.Currency)
+	if !valid {
 		return
 	}
 
@@ -78,18 +89,18 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 // `accountID` and `currency` exists in the database. It takes in a `gin.Context` object, an
 // `accountID` of type `int64`, and a `currency` of type `string`. It returns a boolean value
 // indicating whether the account is valid or not.
-func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency string) bool {
+func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency string) (db.Account, bool) {
 	account, err := server.store.GetAccount(ctx, accountID)
 
 	if !util.CheckError(ctx, err) {
-		return false
+		return account, false
 	}
 
 	if account.Currency != currency {
 		err := fmt.Errorf("account [%d] currency mismatch: %s vs %s", accountID, account.Currency, currency)
 		ctx.JSON(http.StatusBadRequest, util.ErrorResponse(err))
-		return false
+		return account, false
 	}
 
-	return true
+	return account, true
 }
