@@ -28,16 +28,11 @@ type Config struct {
 func LoadConfig(path string) (config Config, err error) {
 	if os.Getenv("G_ACTIONS") == "true" {
 		// GITHUB ACTIONS ENV VARIABLES
-		dur, err := time.ParseDuration("100000m")
-		if err != nil {
-			return Config{}, err
-		}
-
 		config.DBDriver = os.Getenv("DB_DRIVER")
 		config.DBSource = os.Getenv("DB_SOURCE")
 		config.ServerAddress = os.Getenv("SERVER_ADDRESS")
 		config.TokenSymmetricKey = os.Getenv("TOKEN_SYMMETRIC_KEY")
-		config.AccessTokenDuration = dur
+		config.AccessTokenDuration = time.Hour
 	} else {
 		viper.SetConfigFile(path)
 		viper.AutomaticEnv()
