@@ -18,11 +18,12 @@ import (
 // for incoming requests. This property is typically used in web applications to specify the IP address
 // and port number on which the server should listen for incoming HTTP
 type Config struct {
-	DBDriver            string        `mapstructure:"DB_DRIVER"`
-	DBSource            string        `mapstructure:"DB_SOURCE"`
-	ServerAddress       string        `mapstructure:"SERVER_ADDRESS"`
-	TokenSymmetricKey   string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
-	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
+	DBDriver             string        `mapstructure:"DB_DRIVER"`
+	DBSource             string        `mapstructure:"DB_SOURCE"`
+	ServerAddress        string        `mapstructure:"SERVER_ADDRESS"`
+	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
+	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
+	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
 }
 
 func LoadConfig(path string) (config Config, err error) {
@@ -33,6 +34,7 @@ func LoadConfig(path string) (config Config, err error) {
 		config.ServerAddress = os.Getenv("SERVER_ADDRESS")
 		config.TokenSymmetricKey = os.Getenv("TOKEN_SYMMETRIC_KEY")
 		config.AccessTokenDuration = time.Hour
+		config.RefreshTokenDuration = time.Hour * 24
 	} else {
 		viper.SetConfigFile(path)
 		viper.AutomaticEnv()
