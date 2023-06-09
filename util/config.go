@@ -21,6 +21,7 @@ type Config struct {
 	DBDriver             string        `mapstructure:"DB_DRIVER"`
 	DBSource             string        `mapstructure:"DB_SOURCE"`
 	ServerAddress        string        `mapstructure:"SERVER_ADDRESS"`
+	GRPCServerAddress    string        `mapstructure:"GRPC_SERVER_ADDRESS"`
 	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
 	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
@@ -32,6 +33,7 @@ func LoadConfig(path string) (config Config, err error) {
 		config.DBDriver = os.Getenv("DB_DRIVER")
 		config.DBSource = os.Getenv("DB_SOURCE")
 		config.ServerAddress = os.Getenv("SERVER_ADDRESS")
+		config.GRPCServerAddress = os.Getenv("GRPC_SERVER_ADDRESS")
 		config.TokenSymmetricKey = os.Getenv("TOKEN_SYMMETRIC_KEY")
 		config.AccessTokenDuration = time.Hour
 		config.RefreshTokenDuration = time.Hour * 24
